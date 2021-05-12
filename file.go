@@ -39,6 +39,7 @@ type fileLogWriter struct {
 
 	RotatePerm string `json:"rotateperm"`
 
+	filePath string `json:"file_path"`
 	fileNameOnly, suffix string
 }
 
@@ -63,6 +64,7 @@ func (w *fileLogWriter) Init(jsonConfig string) error {
 		return errors.New("must have filename")
 	}
 	w.suffix = filepath.Ext(w.Filename)
+	w.filePath = filepath.Dir(w.Filename)
 	w.fileNameOnly = strings.TrimSuffix(w.Filename, w.suffix)
 	if w.suffix == "" {
 		w.suffix = ".log"
@@ -281,23 +283,19 @@ func (w *fileLogWriter) taskDeleteLog() {
 	diff := (date.Unix() + int64(w.Day)*86400) - d.Unix()
 	t := time.NewTimer(time.Duration(diff) * time.Second)
 
-	dir, _ := filepath.Abs(filepath.Dir(os.Args[0]))
 	goos := runtime.GOOS
-
-	fmt.Println("file path: ", dir,os.Args[0])
 	
 	for {
 		<-t.C
 		
 		if goos == "windows" {
-		execArr := []string{"/c", "forfiles", "-p", dir + "\\diary", "-s", "-m", "*", "-d", "-" + day,
+		execArr := []string{"/c", "forfiles", "-p", w.filePath, "-s", "-m", "*", "-d", "-" + day,
 			"-c", "cmd /c del /q /f @path"}
 
 			cmd = exec.Command("cmd", execArr...)
 		} else {
-			path := strings.Replace(dir, "\\", "/", -1)
-			execName := `find ` + path + `/diary/ -mtime +` + day + ` -name "*" -exec rm -rf {} \;`
-			fmt.Println("cmd: ", execName)
+			execName := `find ` + w.filePath + `/ -ctime +` + day + ` -name "*" -exec rm -rf {} \;`
+
 			cmd = exec.Command("/bin/bash", "-c", execName)
 		}
 		cmd.Start()
