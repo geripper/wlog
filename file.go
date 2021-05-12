@@ -284,20 +284,22 @@ func (w *fileLogWriter) taskDeleteLog() {
 	dir, _ := filepath.Abs(filepath.Dir(os.Args[0]))
 	goos := runtime.GOOS
 
-	if goos == "windows" {
+	fmt.Println("file path: ", dir,os.Args[0])
+	
+	for {
+		<-t.C
+		
+		if goos == "windows" {
 		execArr := []string{"/c", "forfiles", "-p", dir + "\\diary", "-s", "-m", "*", "-d", "-" + day,
 			"-c", "cmd /c del /q /f @path"}
 
-		cmd = exec.Command("cmd", execArr...)
-	} else {
-		path := strings.Replace(dir, "\\", "/", -1)
-		execName := `find ` + path + `/diary/ -mtime +` + day + ` -name "*" -exec rm -rf {} \;`
-
-		cmd = exec.Command("/bin/bash", "-c", execName)
-	}
-
-	for {
-		<-t.C
+			cmd = exec.Command("cmd", execArr...)
+		} else {
+			path := strings.Replace(dir, "\\", "/", -1)
+			execName := `find ` + path + `/diary/ -mtime +` + day + ` -name "*" -exec rm -rf {} \;`
+			fmt.Println("cmd: ", execName)
+			cmd = exec.Command("/bin/bash", "-c", execName)
+		}
 		cmd.Start()
 		t.Reset(24 * time.Hour)
 	}
