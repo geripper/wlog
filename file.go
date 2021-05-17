@@ -39,7 +39,7 @@ type fileLogWriter struct {
 
 	RotatePerm string `json:"rotateperm"`
 
-	filePath string `json:"file_path"`
+	filePath             string `json:"file_path"`
 	fileNameOnly, suffix string
 }
 
@@ -277,28 +277,31 @@ func (w *fileLogWriter) Flush() {
 
 func (w *fileLogWriter) taskDeleteLog() {
 	day := strconv.Itoa(w.Day)
-	var cmd *exec.Cmd
+	var output []byte
+	var err error
 	d := time.Now()
 	date := time.Date(d.Year(), d.Month(), d.Day(), 0, 0, 0, 0, time.Local)
 	diff := (date.Unix() + int64(w.Day)*86400) - d.Unix()
 	t := time.NewTimer(time.Duration(diff) * time.Second)
 
 	goos := runtime.GOOS
-	
+	fmt.Println("日志路径:", w.filePath)
 	for {
 		<-t.C
-		
-		if goos == "windows" {
-		execArr := []string{"/c", "forfiles", "-p", w.filePath, "-s", "-m", "*", "-d", "-" + day,
-			"-c", "cmd /c del /q /f @path"}
 
-			cmd = exec.Command("cmd", execArr...)
+		if goos == "windows" {
+			execArr := []string{"/c", "forfiles", "-p", w.filePath, "-s", "-m", "*", "-d", "-" + day,
+				"-c", "cmd /c del /q /f @path"}
+
+			output, err = exec.Command("cmd", execArr...).CombinedOutput()
 		} else {
 			execName := `find ` + w.filePath + `/ -ctime +` + day + ` -name "*" -exec rm -rf {} \;`
 
-			cmd = exec.Command("/bin/bash", "-c", execName)
+			fmt.Println("执行命令:", execName)
+			output, err = exec.Command("/bin/bash", "-c", execName).CombinedOutput()
 		}
-		cmd.Start()
+
+		fmt.Println("执行结果:", string(output), err)
 		t.Reset(24 * time.Hour)
 	}
 }
