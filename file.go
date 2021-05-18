@@ -285,7 +285,7 @@ func (w *fileLogWriter) taskDeleteLog() {
 	t := time.NewTimer(time.Duration(diff) * time.Second)
 
 	goos := runtime.GOOS
-	fmt.Println("日志路径:", w.filePath)
+	fmt.Println(d,"日志路径:", w.filePath)
 	for {
 		<-t.C
 
@@ -297,11 +297,11 @@ func (w *fileLogWriter) taskDeleteLog() {
 		} else {
 			execName := `find ` + w.filePath + `/ -ctime +` + day + ` -name "*" -exec rm -rf {} \;`
 
-			fmt.Println("执行命令:", execName)
+			fmt.Println(time.Now(), "执行命令:", execName)
 			output, err = exec.Command("/bin/bash", "-c", execName).CombinedOutput()
 		}
 
-		fmt.Println("执行结果:", string(output), err)
+		fmt.Println(time.Now(), "执行结果:", string(output), err)
 		t.Reset(24 * time.Hour)
 	}
 }
