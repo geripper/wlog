@@ -281,7 +281,7 @@ func (w *fileLogWriter) taskDeleteLog() {
 	var err error
 	d := time.Now()
 	date := time.Date(d.Year(), d.Month(), d.Day(), 0, 0, 0, 0, time.Local)
-	diff := (date.Unix() + int64(w.Day)*86400) - d.Unix()
+	diff := (date.Unix() + 86400) - d.Unix()
 	t := time.NewTimer(time.Duration(diff) * time.Second)
 
 	goos := runtime.GOOS
