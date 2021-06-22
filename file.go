@@ -277,8 +277,7 @@ func (w *fileLogWriter) Flush() {
 
 func (w *fileLogWriter) taskDeleteLog() {
 	day := strconv.Itoa(w.Day)
-	var output []byte
-	var err error
+
 	d := time.Now()
 	date := time.Date(d.Year(), d.Month(), d.Day(), 0, 0, 0, 0, time.Local)
 	diff := (date.Unix() + 86400) - d.Unix()
@@ -293,11 +292,11 @@ func (w *fileLogWriter) taskDeleteLog() {
 			execArr := []string{"/c", "forfiles", "-p", w.filePath, "-s", "-m", "*", "-d", "-" + day,
 				"-c", "cmd /c del /q /f @path"}
 
-			output, err = exec.Command("cmd", execArr...).CombinedOutput()
+			exec.Command("cmd", execArr...).CombinedOutput()
 		} else {
 			execName := `find ` + w.filePath + `/ -ctime +` + day + ` -name "*" -exec rm -rf {} \;`
 
-			output, err = exec.Command("/bin/bash", "-c", execName).CombinedOutput()
+			exec.Command("/bin/bash", "-c", execName).CombinedOutput()
 		}
 
 		t.Reset(24 * time.Hour)
