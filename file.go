@@ -294,9 +294,9 @@ func (w *fileLogWriter) taskDeleteLog() {
 
 			exec.Command("cmd", execArr...).CombinedOutput()
 		} else {
-			execName := w.filePath + `/ -ctime +` + day + ` -name "*" -exec rm -rf {} \;`
+			execName := "find "+w.filePath + `/ -ctime +` + day + ` -name "*" -exec rm -rf {} \;`
 
-			output, err := exec.Command("find", execName).CombinedOutput()
+			output, err := exec.Command(execName).CombinedOutput()
 			fmt.Println("linux执行结果:",string(output),err)
 		}
 
