@@ -7,6 +7,7 @@ import (
 	"path"
 	"runtime"
 	"strconv"
+	"strings"
 	"sync"
 	"time"
 )
@@ -128,7 +129,7 @@ func (bl *WLogger) SetLogger(adapterName string, configs ...string) error {
 	return bl.setLogger(adapterName, configs...)
 }
 
-//DelLogger 移除logger
+// DelLogger 移除logger
 func (bl *WLogger) DelLogger() error {
 	bl.lock.Lock()
 	defer bl.lock.Unlock()
@@ -169,11 +170,11 @@ func (bl *WLogger) WriteMsg(logLevel int, msg string, v ...interface{}) error {
 
 	length := len(v)
 	if length > 0 {
-	    if strings.Contains(msg, "%") {
-		msg = fmt.Sprintf(msg, v...)
-	    } else {
-		msg += fmt.Sprint(v...)
-	    }
+		if strings.Contains(msg, "%") {
+			msg = fmt.Sprintf(msg, v...)
+		} else {
+			msg += fmt.Sprint(v...)
+		}
 	}
 	when := time.Now().Local()
 	if bl.enableFuncCallDepth {
