@@ -169,14 +169,7 @@ func (bl *WLogger) WriteMsg(logLevel int, msg string, v ...interface{}) error {
 
 	length := len(v)
 	if length > 0 {
-		// x := make([]interface{}, 0, length)
-		// for _, v1 := range v {
-		// 	x = append(x, v1)
-		// }
-
-		// b, _ := json.Marshal(x)
-		// msg += string(b)
-		msg = fmt.Sprintf(msg, v...)
+	    msg += fmt.Sprint(v...)
 	}
 	when := time.Now().Local()
 	if bl.enableFuncCallDepth {
